@@ -1,0 +1,10 @@
+{
+  "id": "eam-talon",
+  "name": "Eam Talon",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Integrates with Talon Voice scripts.",
+  "author": "Eam",
+  "authorUrl": "https://github.com/downscore",
+  "isDesktopOnly": true
+}
