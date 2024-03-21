@@ -156,8 +156,6 @@ export async function initialize(): Promise<void> {
 // If the request does not ask for the command output, or does not require waiting for the command to finish, the
 // response will be written before the command finishes executing.
 export async function runCommand(editor: obsidian.Editor, view: obsidian.MarkdownView) {
-  console.log("Running command.");
-
   // Make sure the request isn't too old.
   const OBSIDIAN_COMMAND_TIMEOUT_MS = 3000;
   const stats = await stat(getRequestPath());
