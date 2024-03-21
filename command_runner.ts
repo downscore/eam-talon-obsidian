@@ -117,7 +117,10 @@ async function getTextFlowContext(request: Request, editor: obsidian.Editor, vie
 }
 
 // Dictionary of command strings to functions that execute them.
-const commandHandlers: { [commandId: string]: (request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView) => Promise<any> } = {
+const commandHandlers: {
+  [commandId: string]: (request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView)
+    => Promise<any>
+} = {
   "jumpToLine": jumpToLine,
   "selectLineRange": selectLineRange,
   "copyLinesToCursor": copyLinesToCursor,
