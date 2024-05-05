@@ -13,3 +13,4 @@ Useful tools for use with Talon Voice scripts.
 ## Attributions
 
 - Command server functionality based on [Pokey Rule's Command Server](https://github.com/pokey/command-server).
+- Tinychart functionality based on [Alin Coop's Obsidian Plugin](https://github.com/alincoop/obsidian-tinychart/)

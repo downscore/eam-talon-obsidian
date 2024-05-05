@@ -1,5 +1,6 @@
 import { Editor, MarkdownView, Plugin } from 'obsidian';
 import * as commandRunner from "./command_runner";
+import * as tinychart from "./tinychart";
 
 export default class MyPlugin extends Plugin {
   async onload() {
@@ -20,6 +21,12 @@ export default class MyPlugin extends Plugin {
         }
       ]
     });
+
+    // Register handler for tinychart code blocks.
+    this.registerMarkdownCodeBlockProcessor(
+      "tinychart",
+      tinychart.tinychartCodeBlockProcessor
+    );
   }
 
   onunload() {
