@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Plugin } from 'obsidian';
+import { Editor, MarkdownView, Plugin } from 'obsidian';
 import * as commandRunner from "./command_runner";
 
 export default class MyPlugin extends Plugin {
@@ -11,7 +11,7 @@ export default class MyPlugin extends Plugin {
       id: 'run-command',
       name: 'Run Command From Client',
       editorCallback: async (editor: Editor, view: MarkdownView) => {
-        await commandRunner.runCommand(editor, view);
+        await commandRunner.runCommand(editor, view, this.app);
       },
       hotkeys: [
         {

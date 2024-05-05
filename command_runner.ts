@@ -29,7 +29,7 @@ function getResponsePath() {
 }
 
 // Moves the cursor to the given line.
-async function jumpToLine(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView) {
+async function jumpToLine(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView, app: obsidian.App) {
   // Input lines are 1-based, editor lines are 0-based.
   const line = request.args[0];
   if (line < 1) {
@@ -39,7 +39,8 @@ async function jumpToLine(request: Request, editor: obsidian.Editor, view: obsid
 }
 
 // Selects the given line range.
-async function selectLineRange(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView) {
+async function selectLineRange(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+  app: obsidian.App) {
   const lineFrom = request.args[0];
   const lineTo = request.args[1] || lineFrom;
 
@@ -58,7 +59,8 @@ async function selectLineRange(request: Request, editor: obsidian.Editor, view: 
 }
 
 // Copies the given line range to the cursor location, overwriting selection if any.
-async function copyLinesToCursor(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView) {
+async function copyLinesToCursor(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+  app: obsidian.App) {
   const lineFrom = request.args[0];
   const lineTo = request.args[1] || lineFrom;
 
@@ -78,7 +80,7 @@ async function copyLinesToCursor(request: Request, editor: obsidian.Editor, view
 }
 
 // Sets the selection to the given offsets. Used to support TextFlow.
-async function setSelection(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView) {
+async function setSelection(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView, app: obsidian.App) {
   const offsetFrom = request.args[0];
   const offsetTo = request.args[1];
 
@@ -89,7 +91,8 @@ async function setSelection(request: Request, editor: obsidian.Editor, view: obs
 }
 
 // Get TextFlow context.
-async function getTextFlowContext(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView) {
+async function getTextFlowContext(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+  app: obsidian.App) {
   // Get the current selection range as offsets into the file.
   const selectionFromPos = editor.getCursor("from");
   const selectionToPos = editor.getCursor("to");
@@ -116,16 +119,69 @@ async function getTextFlowContext(request: Request, editor: obsidian.Editor, vie
   };
 }
 
+// Get the path to the file in the active editor.
+async function getFilename(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+  app: obsidian.App) {
+  const activeFile = app.workspace.getActiveFile();
+  if (!activeFile) {
+    throw new Error("No active file");
+  }
+
+  const adapter = app.vault.adapter;
+  if (adapter instanceof obsidian.FileSystemAdapter) {
+    return join(adapter.getBasePath(), activeFile.path);
+  }
+  throw new Error("Vault adapter not a FileSystemAdapter. Not a local vault?");
+}
+
+// Select word under the cursor.
+async function selectWord(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+  app: obsidian.App) {
+  // Use "to" cursor position to select the word under the cursor.
+  const cursorPos = editor.getCursor("to");
+  const cursorLine = editor.getLine(cursorPos.line);
+
+  // Define regular expression to match words.
+  // Include apostrophes in words.
+  const wordRegex = /[\w']+/g;
+
+  // Find all words in the line.
+  let match;
+  let start = -1;
+  let end = -1;
+  while ((match = wordRegex.exec(cursorLine)) !== null) {
+    const matchStart = match.index;
+    const matchEnd = matchStart + match[0].length;
+
+    // If the cursor is within the word, get the start and end positions.
+    if (cursorPos.ch >= matchStart && cursorPos.ch <= matchEnd) {
+      start = matchStart;
+      end = matchEnd;
+      break;
+    }
+  }
+
+  // If a word is found, select it
+  if (start !== -1 && end !== -1) {
+    editor.setSelection(
+      { line: cursorPos.line, ch: start },
+      { line: cursorPos.line, ch: end }
+    );
+  }
+}
+
 // Dictionary of command strings to functions that execute them.
 const commandHandlers: {
-  [commandId: string]: (request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView)
+  [commandId: string]: (request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView, app: obsidian.App)
     => Promise<any>
 } = {
   "jumpToLine": jumpToLine,
   "selectLineRange": selectLineRange,
   "copyLinesToCursor": copyLinesToCursor,
   "setSelection": setSelection,
-  "getTextFlowContext": getTextFlowContext
+  "getTextFlowContext": getTextFlowContext,
+  "getFilename": getFilename,
+  "selectWord": selectWord
 };
 
 // Prepares the command runner for reading and writing the request and response files.
@@ -158,7 +214,7 @@ export async function initialize(): Promise<void> {
 // Reads a command from the request file, executes it, and writes the result to the response file.
 // If the request does not ask for the command output, or does not require waiting for the command to finish, the
 // response will be written before the command finishes executing.
-export async function runCommand(editor: obsidian.Editor, view: obsidian.MarkdownView) {
+export async function runCommand(editor: obsidian.Editor, view: obsidian.MarkdownView, app: obsidian.App) {
   // Make sure the request isn't too old.
   const OBSIDIAN_COMMAND_TIMEOUT_MS = 3000;
   const stats = await stat(getRequestPath());
@@ -197,7 +253,7 @@ export async function runCommand(editor: obsidian.Editor, view: obsidian.Markdow
     if (!commandHandlers[request.commandId]) {
       throw new Error(`Unknown command ID: ${request.commandId}`);
     }
-    const commandPromise = commandHandlers[request.commandId](request, editor, view);
+    const commandPromise = commandHandlers[request.commandId](request, editor, view, app);
     if (request.returnCommandOutput) {
       response.returnValue = await commandPromise;
     } else if (request.waitForFinish) {
