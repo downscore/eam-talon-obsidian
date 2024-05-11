@@ -134,6 +134,14 @@ async function getFilename(request: Request, editor: obsidian.Editor, view: obsi
   throw new Error("Vault adapter not a FileSystemAdapter. Not a local vault?");
 }
 
+// Get the selected text.
+// Copying in Obsidian with an empty selection copies the entire line, making it impossible to reliably detect when no
+// text is selected. This command will return the empty string when nothing is selected.
+async function getSelectedText(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+  app: obsidian.App) {
+  return editor.getSelection();
+}
+
 // Select word under the cursor.
 async function selectWord(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
   app: obsidian.App) {
@@ -181,7 +189,8 @@ const commandHandlers: {
   "setSelection": setSelection,
   "getTextFlowContext": getTextFlowContext,
   "getFilename": getFilename,
-  "selectWord": selectWord
+  "selectWord": selectWord,
+  "getSelectedText": getSelectedText
 };
 
 // Prepares the command runner for reading and writing the request and response files.
