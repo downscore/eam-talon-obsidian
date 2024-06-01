@@ -178,6 +178,21 @@ async function selectWord(request: Request, editor: obsidian.Editor, view: obsid
   }
 }
 
+async function insertNewLineAbove(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+  app: obsidian.App) {
+  const lineNumber = request.args[0];
+  const pos = { line: lineNumber - 1, ch: 0 };
+  editor.replaceRange("\n", pos);
+}
+
+async function insertNewLineBelow(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+  app: obsidian.App) {
+  const lineNumber = request.args[0];
+  const lineText = editor.getLine(lineNumber - 1);
+  const pos = { line: lineNumber - 1, ch: lineText.length };
+  editor.replaceRange("\n", pos);
+}
+
 // Dictionary of command strings to functions that execute them.
 const commandHandlers: {
   [commandId: string]: (request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView, app: obsidian.App)
@@ -190,7 +205,9 @@ const commandHandlers: {
   "getTextFlowContext": getTextFlowContext,
   "getFilename": getFilename,
   "selectWord": selectWord,
-  "getSelectedText": getSelectedText
+  "getSelectedText": getSelectedText,
+  "insertNewLineAbove": insertNewLineAbove,
+  "insertNewLineBelow": insertNewLineBelow
 };
 
 // Prepares the command runner for reading and writing the request and response files.
