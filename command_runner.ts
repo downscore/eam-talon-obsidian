@@ -39,7 +39,7 @@ async function jumpToLine(request: Request, editor: obsidian.Editor, view: obsid
 }
 
 // Selects the given line range.
-async function selectLineRange(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+async function selectLineRangeIncludingLineBreak(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
   app: obsidian.App) {
   const lineFrom = request.args[0];
   const lineTo = request.args[1] || lineFrom;
@@ -56,6 +56,24 @@ async function selectLineRange(request: Request, editor: obsidian.Editor, view: 
   }
 
   editor.setSelection(start, end);
+}
+
+// Select the given line range, but do not select trailing line break if a single line is selected.
+async function selectLineRangeForEditing(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+  app: obsidian.App) {
+  const lineFrom = request.args[0];
+  const lineTo = request.args[1] || lineFrom;
+
+  // Include line break if selecting multiple lines.
+  if (lineFrom !== lineTo) {
+    selectLineRangeIncludingLineBreak(request, editor, view, app);
+    return
+  }
+
+  // Select the line without the trailing line break.
+  const line = lineFrom - 1;
+  const lineText = editor.getLine(line);
+  editor.setSelection({ line, ch: 0 }, { line, ch: lineText.length });
 }
 
 // Copies the given line range to the cursor location, overwriting selection if any.
@@ -199,7 +217,8 @@ const commandHandlers: {
     => Promise<any>
 } = {
   "jumpToLine": jumpToLine,
-  "selectLineRange": selectLineRange,
+  "selectLineRangeIncludingLineBreak": selectLineRangeIncludingLineBreak,
+  "selectLineRangeForEditing": selectLineRangeForEditing,
   "copyLinesToCursor": copyLinesToCursor,
   "setSelection": setSelection,
   "getTextFlowContext": getTextFlowContext,
