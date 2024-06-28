@@ -105,7 +105,12 @@ async function setSelection(request: Request, editor: obsidian.Editor, view: obs
   const posFrom = editor.offsetToPos(offsetFrom);
   const posTo = editor.offsetToPos(offsetTo);
 
+  // Set the selection twice to work around some unusual behavior when we are trying to select part of a link and source
+  // mode is not enabled.
   editor.setSelection(posFrom, posTo);
+  // Wait for UI to refresh, then set the selection again.
+  const refresh_promise = new Promise(resolve => setTimeout(() => editor.setSelection(posFrom, posTo), 0 /*ms*/));
+  await refresh_promise;
 }
 
 // Get TextFlow context.
