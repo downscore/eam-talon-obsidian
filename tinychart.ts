@@ -127,7 +127,6 @@ function generateBarChart(
 export function tinychartCodeBlockProcessor(source: string, el: HTMLElement) {
   try {
     const parsedSpec: TinyChartSpec = parseInput(source);
-    console.log(parsedSpec)
     const barChart: string = generateBarChart(parsedSpec);
     // Set the blocktype depending on the setting
     const codeBlockFlag: boolean = parsedSpec.settings.codeBlock;

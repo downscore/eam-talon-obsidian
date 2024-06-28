@@ -109,8 +109,8 @@ async function setSelection(request: Request, editor: obsidian.Editor, view: obs
   // mode is not enabled.
   editor.setSelection(posFrom, posTo);
   // Wait for UI to refresh, then set the selection again.
-  const refresh_promise = new Promise(resolve => setTimeout(() => editor.setSelection(posFrom, posTo), 0 /*ms*/));
-  await refresh_promise;
+  await new Promise(resolve => setTimeout(resolve, 1 /*ms*/));
+  editor.setSelection(posFrom, posTo);
 }
 
 // Get TextFlow context.
