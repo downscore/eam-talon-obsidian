@@ -27,6 +27,16 @@ export default class MyPlugin extends Plugin {
       "tinychart",
       tinychart.tinychartCodeBlockProcessor
     );
+
+    // Register CSS changes.
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* Hide tabs. */
+        .workspace-tab-header-container-inner, .workspace-tab-header-new-tab {
+            display: none !important;
+        }
+    `;
+    document.head.appendChild(style);
   }
 
   onunload() {
