@@ -97,7 +97,7 @@ async function copyLinesToCursor(request: Request, editor: obsidian.Editor, view
   editor.replaceSelection(text);
 }
 
-// Sets the selection to the given offsets. Used to support TextFlow.
+// Sets the selection to the given offsets.
 async function setSelection(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView, app: obsidian.App) {
   const offsetFrom = request.args[0];
   const offsetTo = request.args[1];
@@ -113,8 +113,8 @@ async function setSelection(request: Request, editor: obsidian.Editor, view: obs
   editor.setSelection(posFrom, posTo);
 }
 
-// Get TextFlow context.
-async function getTextFlowContext(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
+// Get editor context.
+async function getEditorContext(request: Request, editor: obsidian.Editor, view: obsidian.MarkdownView,
   app: obsidian.App) {
   // Get the current selection range as offsets into the file.
   const selectionFromPos = editor.getCursor("from");
@@ -226,7 +226,7 @@ const commandHandlers: {
   "selectLineRangeForEditing": selectLineRangeForEditing,
   "copyLinesToCursor": copyLinesToCursor,
   "setSelection": setSelection,
-  "getTextFlowContext": getTextFlowContext,
+  "getEditorContext": getEditorContext,
   "getFilename": getFilename,
   "selectWord": selectWord,
   "getSelectedText": getSelectedText,
