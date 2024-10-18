@@ -29,14 +29,16 @@ export default class MyPlugin extends Plugin {
     );
 
     // Register CSS changes.
-    const style = document.createElement('style');
-    style.innerHTML = `
-        /* Hide tabs. */
-        .workspace-tab-header-container-inner, .workspace-tab-header-new-tab {
-            display: none !important;
-        }
-    `;
-    document.head.appendChild(style);
+    // TODO: This also hides controls for changing sidebar content. Figure out how to hide only the
+    // tabs.
+    // const style = document.createElement('style');
+    // style.innerHTML = `
+    //     /* Hide tabs. */
+    //     .workspace-tab-header-container-inner, .workspace-tab-header-new-tab {
+    //         display: none !important;
+    //     }
+    // `;
+    // document.head.appendChild(style);
   }
 
   onunload() {
