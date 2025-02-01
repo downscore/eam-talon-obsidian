@@ -39,6 +39,37 @@ export default class MyPlugin extends Plugin {
     //     }
     // `;
     // document.head.appendChild(style);
+
+    // Register a keyboard shortcut for inserting a new line under the current line.
+    this.addCommand({
+      id: 'insert-new-line-below',
+      name: 'Insert New Line Below',
+      editorCallback: async (editor: Editor, view: MarkdownView) => {
+        // Don't do anything if the editor is not focused.
+        if (!editor.hasFocus()) {
+          return;
+        }
+
+        // Check if the current line is part of a list.
+        const current_line_text = editor.getLine(editor.getCursor().line);
+        const list_prefix = current_line_text.match(/^(\s*[-+*]\s)/);
+
+        // Insert a new line below the current line and move the cursor there.
+        editor.setCursor(editor.getCursor().line, current_line_text.length);
+        editor.replaceSelection("\n");
+
+        // Insert the list prefix if we came from a line that was a list item.
+        if (list_prefix) {
+          editor.replaceSelection(list_prefix[0]);
+        }
+      },
+      hotkeys: [
+        {
+          modifiers: ['Mod'],
+          key: 'Enter'
+        }
+      ]
+    });
   }
 
   onunload() {
